@@ -9,6 +9,6 @@
   
   console.log("addShader");
   var vid=document.querySelector("#vid");
-  vid.dispatchEvent(new Event("loadeddata"));
+  if(vid)dispatchEvent(new Event("loadeddata"));
 //   vid.src=vid.src;   
 })();  
