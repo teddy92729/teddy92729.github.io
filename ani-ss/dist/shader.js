@@ -8,5 +8,5 @@
   addCustomProgram(getAnime4k());
   
   console.log("addShader");
-// vid.src=vid.src;   
+  vid.src=vid.src;   
 })();  
