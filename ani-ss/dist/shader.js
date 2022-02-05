@@ -1,11 +1,8 @@
 (async()=>{
-  var anime4k=await fetch("https://teddy92729.github.io/ani-ss/dist/Anime4K_Upscale_Denoise_CNN_x2_VL.glsl").then(r=>r.text());
+  var anime4kBlur=await fetch("https://teddy92729.github.io/ani-ss/dist/Anime4K_Upscale_Deblur_DoG_x2.glsl").then(r=>r.text());
   // console.log(anime4k);
-  window.getAnime4k=function(){
-    return anime4k;
-  }
 
-  addCustomProgram(getAnime4k());
+  addCustomProgram(anime4kBlur);
   
   console.log("addShader");
   var vid=document.querySelector("#vid");
