@@ -1,5 +1,5 @@
 (async()=>{
-  var anime4kBlur=await fetch("https://teddy92729.github.io/ani-ss/dist/Anime4K_Upscale_Deblur_DoG_x2.glsl").then(r=>r.text());
+  var anime4kBlur=await fetch("https://teddy92729.github.io/ani-ss/dist/Anime4K_Restore_CNN_VL.glsl").then(r=>r.text());
   // console.log(anime4k);
 
   addCustomProgram(anime4kBlur);
