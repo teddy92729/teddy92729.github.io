@@ -2,7 +2,7 @@
   var vid=document.querySelector("#vid");
   if(vid)vid.pause();
   console.log("Adding shader");
-  anime4k=await fetch("https://teddy92729.github.io/ani-ss/dist/Anime4K_Upscale_CNN_x1.5_UL.glsl").then(r=>r.text());
+  anime4k=await fetch("https://teddy92729.github.io/ani-ss/dist/Anime4K_Upscale_CNN_x2_UL.glsl").then(r=>r.text());
   addCustomProgram(anime4k);
   
   var anime4k=await fetch("https://teddy92729.github.io/ani-ss/dist/Anime4K_Deblur_Original.glsl").then(r=>r.text());
