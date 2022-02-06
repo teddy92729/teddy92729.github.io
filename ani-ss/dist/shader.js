@@ -4,7 +4,10 @@
   console.log("Adding shader");
   var anime4k;
 
-  anime4k=await fetch("https://teddy92729.github.io/ani-ss/dist/Anime4K_Upscale_Deblur_DoG_CNN_x2_VL.glsl").then(r=>r.text());
+  anime4k=await fetch("https://teddy92729.github.io/ani-ss/dist/Anime4K_Upscale_CNN_x2_L.glsl").then(r=>r.text());
+  addCustomProgram(anime4k);
+  
+  anime4k=await fetch("https://teddy92729.github.io/ani-ss/dist/Anime4K_Deblur_Original.glsl").then(r=>r.text());
   addCustomProgram(anime4k);
   
   console.log("shader added");
