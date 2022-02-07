@@ -309,7 +309,7 @@ vec4 hook() {
 //!HEIGHT NATIVE.h 2 *
 
 
-#define STRANGTH 0.2
+#define STRANGTH 0.1
 
 vec4 get_YUV(vec4 rgb) {
 	return vec4(mat3(0.299,0.587,0.114,-0.14713,-0.28886,0.436,0.615,-0.51499,-0.10001)*rgb.rgb,0.0);
