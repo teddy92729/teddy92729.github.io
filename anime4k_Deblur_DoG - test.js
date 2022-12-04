@@ -175,16 +175,17 @@ void main(){
 
 getVideoCanvas("video").then(([video,stage])=>{
   let noiseFilter=new PIXI.filters.NoiseFilter();
-  noiseFilter.noise=0.05;
+  noiseFilter.noise=0.1;
 
   let anime4k_deblur_dog = new PIXI.Filter(null, anime4k_deblur_dog_frag);
-  console.log(video,stage,anime4k_deblur_dog);
-  document.body.addEventListener("keydown",(e)=>{
-    if(e&&(e.code==="KeyI")){
-      anime4k_deblur_dog.enabled=!anime4k_deblur_dog.enabled;
-      console.log(anime4k_deblur_dog.enabled);
-    }
-  });
+  // console.log(video,stage,anime4k_deblur_dog);
+  // document.body.addEventListener("keydown",(e)=>{
+  //   if(e&&(e.code==="KeyI")){
+  //     anime4k_deblur_dog.enabled=!anime4k_deblur_dog.enabled;
+  //     console.log(anime4k_deblur_dog.enabled);
+  //   }
+  // });
 
   stage.filters=[anime4k_deblur_dog,noiseFilter];
+  console.log("anime4k Deblur DoG!");
 });
