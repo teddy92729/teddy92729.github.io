@@ -174,8 +174,6 @@ void main(){
 
 
 getVideoCanvas("video").then(([video,stage])=>{
-  let noiseFilter=new PIXI.filters.NoiseFilter();
-  noiseFilter.noise=0.1;
 
   let anime4k_deblur_dog = new PIXI.Filter(null, anime4k_deblur_dog_frag);
   // console.log(video,stage,anime4k_deblur_dog);
@@ -186,6 +184,6 @@ getVideoCanvas("video").then(([video,stage])=>{
   //   }
   // });
 
-  stage.filters=[anime4k_deblur_dog,noiseFilter];
+  stage.filters=[anime4k_deblur_dog];
   console.log("anime4k Deblur DoG!");
 });
