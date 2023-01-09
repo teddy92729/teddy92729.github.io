@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://*/*.mp4
 // @grant       none
-// @version     1.1
+// @version     1.2
 // @author      -
 // @require     https://teddy92729.github.io/elementCreated.js
 // @require     https://pixijs.download/release/pixi.js
