@@ -161,7 +161,7 @@ out vec4 color;
 #define MAIN_texOff(offset) MAIN_tex(MAIN_pos+(offset)*MAIN_pt)
 //-------------------------------------------
 #define EdgeSlope 0.6
-#define Power     0.1
+#define Power     0.05
 float get_luma(vec4 rgba) {
 	return dot(vec4(0.299, 0.587, 0.114, 0.0), rgba);
 }
@@ -177,7 +177,7 @@ void main(){
     color=hook();
 }
 `;
-const fxaa_frag=
+const cas_frag=
 `#version 300 es
 precision highp float;
 in vec2 vTextureCoord;
@@ -192,61 +192,105 @@ out vec4 color;
 #define MAIN_pt       inputSize.zw
 #define MAIN_texOff(offset) MAIN_tex(MAIN_pos+(offset)*MAIN_pt)
 //-------------------------------------------
-#ifndef FXAA_REDUCE_MIN
-    #define FXAA_REDUCE_MIN   (1.0/ 128.0)
-#endif
-#ifndef FXAA_REDUCE_MUL
-    #define FXAA_REDUCE_MUL   (1.0 / 8.0)
-#endif
-#ifndef FXAA_SPAN_MAX
-    #define FXAA_SPAN_MAX     8.0
-#endif
-vec4 fxaa(){
-    vec4 color_;
-    mediump vec2 inverseVP = MAIN_pt;
-    vec3 rgbNW = MAIN_texOff(vec2(-1,-1)).xyz;
-    vec3 rgbNE = MAIN_texOff(vec2( 1,-1)).xyz;
-    vec3 rgbSW = MAIN_texOff(vec2(-1, 1)).xyz;
-    vec3 rgbSE = MAIN_texOff(vec2( 1, 1)).xyz;
-    vec4 texColor = MAIN_tex(MAIN_pos);
-    vec3 rgbM  = texColor.xyz;
-    vec3 luma = vec3(0.299, 0.587, 0.114);
-    float lumaNW = dot(rgbNW, luma);
-    float lumaNE = dot(rgbNE, luma);
-    float lumaSW = dot(rgbSW, luma);
-    float lumaSE = dot(rgbSE, luma);
-    float lumaM  = dot(rgbM,  luma);
-    float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));
-    float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));
+#define Contrast    1.0
+#define Sharpening  1.0
+vec4 cas(){
+  vec3 b = MAIN_texOff(vec2( 0,-1)).rgb;
+  vec3 d = MAIN_texOff(vec2(-1, 0)).rgb;
 
-    mediump vec2 dir;
-    dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));
-    dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
+  vec3 e = MAIN_texOff(vec2(0,0)).rgb;
+  vec3 f = MAIN_texOff(vec2(1,0)).rgb;
 
-    float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) *
-                          (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
+  vec3 h = MAIN_texOff(vec2(0,1)).rgb;
+  vec3 i = MAIN_texOff(vec2(1,1)).rgb;
 
-    float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
-    dir = min(vec2(FXAA_SPAN_MAX, FXAA_SPAN_MAX),
-              max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
-              dir * rcpDirMin)) * inverseVP;
+  vec3 g = MAIN_texOff(vec2(-1, 1)).rgb;
+	vec3 a = MAIN_texOff(vec2(-1,-1)).rgb;
+	vec3 c = MAIN_texOff(vec2( 1,-1)).rgb;
 
-    vec3 rgbA = 0.5 * (
-        texture(uSampler, MAIN_pos + dir * (1.0 / 3.0 - 0.5)).xyz +
-        texture(uSampler, MAIN_pos + dir * (2.0 / 3.0 - 0.5)).xyz);
-    vec3 rgbB = rgbA * 0.5 + 0.25 * (
-        texture(uSampler, MAIN_pos + dir * -0.5).xyz +
-        texture(uSampler, MAIN_pos + dir * 0.5).xyz);
+  vec3 mnRGB = min(min(min(d, e), min(f, b)), h);
+	vec3 mnRGB2 = min(mnRGB, min(min(a, c), min(g, i)));
+	mnRGB += mnRGB2;
 
-    float lumaB = dot(rgbB, luma);
-    if ((lumaB < lumaMin) || (lumaB > lumaMax))
-        color_ = vec4(rgbA, texColor.a);
-    else
-        color_ = vec4(rgbB, texColor.a);
-    return color_;
+  vec3 mxRGB = max(max(max(d, e), max(f, b)), h);
+  vec3 mxRGB2 = max(mxRGB, max(max(a, c), max(g, i)));
+	mxRGB += mxRGB2;
+
+
+  vec3 rcpMRGB = 1.0/mxRGB;
+	vec3 ampRGB = clamp(min(mnRGB, 2.0 - mxRGB) * rcpMRGB,0.0,1.0);
+
+  ampRGB = 1.0/sqrt(ampRGB);
+
+  float peak = -3.0 * Contrast + 8.0;
+	vec3 wRGB = -1.0/(ampRGB * peak);
+
+	vec3 rcpWeightRGB = 1.0/(4.0 * wRGB + 1.0);
+
+	vec3 window = (b + d) + (f + h);
+	vec3 outColor = clamp((window * wRGB + e) * rcpWeightRGB,0.0,1.0);
+
+	return vec4(mix(e, outColor, Sharpening),1.0);
 }
+
 void main(){
-    color=fxaa();
+    color=cas();
+}
+`;
+const smartDeNoise_frag=
+`#version 300 es
+precision highp float;
+in vec2 vTextureCoord;
+uniform vec4 inputSize;
+uniform sampler2D uSampler;
+uniform sampler2D Orginal;
+out vec4 color;
+//-------------------------------------------
+#define MAIN_pos      vTextureCoord
+#define MAIN_tex(pos) texture(uSampler, pos)
+#define Orginal_tex(pos) texture(Orginal, pos)
+#define MAIN_pt       inputSize.zw
+#define MAIN_texOff(offset) MAIN_tex(MAIN_pos+(offset)*MAIN_pt)
+//-------------------------------------------
+#define INV_SQRT_OF_2PI 0.39894228040143267793994605993439  // 1.0/SQRT_OF_2PI
+#define INV_PI          0.31830988618379067153776752674503
+#define sigma           2.0
+#define kSigma          2.0
+#define threshold       0.18
+vec4 smartDeNoise(){
+    float radius = round(kSigma*sigma);
+    float radQ = radius * radius;
+
+    float invSigmaQx2 = .5 / (sigma * sigma);      // 1.0 / (sigma^2 * 2.0)
+    float invSigmaQx2PI = INV_PI * invSigmaQx2;    // 1/(2 * PI * sigma^2)
+
+    float invThresholdSqx2 = .5 / (threshold * threshold);     // 1.0 / (sigma^2 * 2.0)
+    float invThresholdSqrt2PI = INV_SQRT_OF_2PI / threshold;   // 1.0 / (sqrt(2*PI) * sigma^2)
+
+    vec4 centrPx = MAIN_tex(MAIN_pos);
+
+    float zBuff = 0.0;
+    vec4 aBuff = vec4(0.0);
+
+    vec2 d;
+    for (d.x=-radius; d.x <= radius; d.x++) {
+        float pt = sqrt(radQ-d.x*d.x);       // pt = yRadius: have circular trend
+        for (d.y=-pt; d.y <= pt; d.y++) {
+            float blurFactor = exp( -dot(d , d) * invSigmaQx2 ) * invSigmaQx2PI;
+
+            vec4 walkPx =  MAIN_texOff(d);
+            vec4 dC = walkPx-centrPx;
+            float deltaFactor = exp( -dot(dC, dC) * invThresholdSqx2) * invThresholdSqrt2PI * blurFactor;
+
+            zBuff += deltaFactor;
+            aBuff += deltaFactor*walkPx;
+        }
+    }
+    return aBuff/zBuff;
+}
+
+void main(){
+    color=smartDeNoise();
 }
 `;
 
@@ -260,8 +304,8 @@ function getVideoCanvas(videoElement){
         video.addEventListener("loadedmetadata",()=>{r1(video)});
     })).then((video)=>{
 
-      const width=2*video.videoWidth;
-      const height=2*video.videoHeight;
+      const width=1.5*video.videoWidth;
+      const height=1.5*video.videoHeight;
 
       let renderer = new PIXI.Renderer({ width: width, height: height ,antialias: true});
       let canvas= renderer.view;
@@ -275,30 +319,20 @@ function getVideoCanvas(videoElement){
 
       let noiseFilter=new PIXI.filters.NoiseFilter();
       noiseFilter.noise=0.03;
-      let blurFilter=new PIXI.filters.BlurFilter(0.3);
+      let blurFilter=new PIXI.filters.BlurFilter(0.1);
 
-      let anime4k_deblur_dog         = new PIXI.Filter(null, anime4k_deblur_dog_frag);
+      let anime4k_deblur_dog         = new PIXI.Filter(null  , anime4k_deblur_dog_frag);
       let cartoon                    = new PIXI.Filter(vertex, cartoon_frag);
-      let fxaa                    = new PIXI.Filter(vertex, fxaa_frag);
+      let cas                        = new PIXI.Filter(vertex, cas_frag);
+      let smartDeNoise               = new PIXI.Filter(vertex, smartDeNoise_frag);
       let filters=[
-                    // blurFilter,
                     anime4k_deblur_dog,
-                    cartoon,
-                    fxaa,
+                    cas,
                     noiseFilter,
+                    smartDeNoise,
+                    cartoon,
                    ];
       stage.filters=filters;
-      document.body.addEventListener("keydown",(e)=>{
-        if(e&&(e.code==="KeyI")){
-          let toggle=!stage.filters[0].enabled;
-          for(let i in stage.filters){
-            stage.filters[i].enabled=toggle;
-          }
-          console.log(toggle);
-        }
-        // console.log(e,e.code)
-      });
-
 
       let update=(function update_init(){
         return function(){
@@ -309,6 +343,18 @@ function getVideoCanvas(videoElement){
           }
         }
       })();
+
+      document.body.addEventListener("keydown",(e)=>{
+        if(e&&(e.code==="KeyI")){
+          let toggle=!stage.filters[0].enabled;
+          for(let i in stage.filters){
+            stage.filters[i].enabled=toggle;
+          }
+          renderer.render(stage);
+          console.log(toggle);
+        }
+        // console.log(e,e.code)
+      });
 
       video.parentNode.insertBefore(canvas,video.nextSibling);
 
