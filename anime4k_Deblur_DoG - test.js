@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://*/*.mp4
 // @grant       none
-// @version     1.2
+// @version     1.4
 // @author      -
 // @require     https://teddy92729.github.io/elementCreated.js
 // @require     https://pixijs.download/release/pixi.js
@@ -160,8 +160,8 @@ out vec4 color;
 #define MAIN_pt       inputSize.zw
 #define MAIN_texOff(offset) MAIN_tex(MAIN_pos+(offset)*MAIN_pt)
 //-------------------------------------------
-#define EdgeSlope 0.6
-#define Power     0.05
+#define EdgeSlope 2.0
+#define Power     0.1
 float get_luma(vec4 rgba) {
 	return dot(vec4(0.299, 0.587, 0.114, 0.0), rgba);
 }
@@ -192,8 +192,8 @@ out vec4 color;
 #define MAIN_pt       inputSize.zw
 #define MAIN_texOff(offset) MAIN_tex(MAIN_pos+(offset)*MAIN_pt)
 //-------------------------------------------
-#define Contrast    1.0
-#define Sharpening  1.0
+#define Contrast    0.5
+#define Sharpening  0.5
 vec4 cas(){
   vec3 b = MAIN_texOff(vec2( 0,-1)).rgb;
   vec3 d = MAIN_texOff(vec2(-1, 0)).rgb;
@@ -237,63 +237,6 @@ void main(){
     color=cas();
 }
 `;
-const smartDeNoise_frag=
-`#version 300 es
-precision highp float;
-in vec2 vTextureCoord;
-uniform vec4 inputSize;
-uniform sampler2D uSampler;
-uniform sampler2D Orginal;
-out vec4 color;
-//-------------------------------------------
-#define MAIN_pos      vTextureCoord
-#define MAIN_tex(pos) texture(uSampler, pos)
-#define Orginal_tex(pos) texture(Orginal, pos)
-#define MAIN_pt       inputSize.zw
-#define MAIN_texOff(offset) MAIN_tex(MAIN_pos+(offset)*MAIN_pt)
-//-------------------------------------------
-#define INV_SQRT_OF_2PI 0.39894228040143267793994605993439  // 1.0/SQRT_OF_2PI
-#define INV_PI          0.31830988618379067153776752674503
-#define sigma           2.0
-#define kSigma          2.0
-#define threshold       0.18
-vec4 smartDeNoise(){
-    float radius = round(kSigma*sigma);
-    float radQ = radius * radius;
-
-    float invSigmaQx2 = .5 / (sigma * sigma);      // 1.0 / (sigma^2 * 2.0)
-    float invSigmaQx2PI = INV_PI * invSigmaQx2;    // 1/(2 * PI * sigma^2)
-
-    float invThresholdSqx2 = .5 / (threshold * threshold);     // 1.0 / (sigma^2 * 2.0)
-    float invThresholdSqrt2PI = INV_SQRT_OF_2PI / threshold;   // 1.0 / (sqrt(2*PI) * sigma^2)
-
-    vec4 centrPx = MAIN_tex(MAIN_pos);
-
-    float zBuff = 0.0;
-    vec4 aBuff = vec4(0.0);
-
-    vec2 d;
-    for (d.x=-radius; d.x <= radius; d.x++) {
-        float pt = sqrt(radQ-d.x*d.x);       // pt = yRadius: have circular trend
-        for (d.y=-pt; d.y <= pt; d.y++) {
-            float blurFactor = exp( -dot(d , d) * invSigmaQx2 ) * invSigmaQx2PI;
-
-            vec4 walkPx =  MAIN_texOff(d);
-            vec4 dC = walkPx-centrPx;
-            float deltaFactor = exp( -dot(dC, dC) * invThresholdSqx2) * invThresholdSqrt2PI * blurFactor;
-
-            zBuff += deltaFactor;
-            aBuff += deltaFactor*walkPx;
-        }
-    }
-    return aBuff/zBuff;
-}
-
-void main(){
-    color=smartDeNoise();
-}
-`;
-
 function getVideoCanvas(videoElement){
   return new Promise(async(r0)=>{
     (new Promise(async (r1)=>{
@@ -304,10 +247,10 @@ function getVideoCanvas(videoElement){
         video.addEventListener("loadedmetadata",()=>{r1(video)});
     })).then((video)=>{
 
-      const width=1.5*video.videoWidth;
-      const height=1.5*video.videoHeight;
+      const width=2*video.videoWidth;
+      const height=2*video.videoHeight;
 
-      let renderer = new PIXI.Renderer({ width: width, height: height ,antialias: true});
+      let renderer = new PIXI.Renderer({ width: width, height: height});
       let canvas= renderer.view;
       let stage = new PIXI.Container();
 
@@ -317,20 +260,17 @@ function getVideoCanvas(videoElement){
       sprite.height=height;
       stage.addChild(sprite);
 
-      let noiseFilter=new PIXI.filters.NoiseFilter();
-      noiseFilter.noise=0.03;
-      let blurFilter=new PIXI.filters.BlurFilter(0.1);
-
       let anime4k_deblur_dog         = new PIXI.Filter(null  , anime4k_deblur_dog_frag);
       let cartoon                    = new PIXI.Filter(vertex, cartoon_frag);
       let cas                        = new PIXI.Filter(vertex, cas_frag);
-      let smartDeNoise               = new PIXI.Filter(vertex, smartDeNoise_frag);
+      let noiseFilter                = new PIXI.filters.NoiseFilter();
+      noiseFilter.noise=0.03;
+
       let filters=[
                     anime4k_deblur_dog,
+                    cartoon,
                     cas,
                     noiseFilter,
-                    smartDeNoise,
-                    cartoon,
                    ];
       stage.filters=filters;
 
