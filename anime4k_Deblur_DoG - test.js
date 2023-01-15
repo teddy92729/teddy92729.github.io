@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://*/*.mp4
 // @grant       none
-// @version     1.4
+// @version     1.5
 // @author      -
 // @require     https://teddy92729.github.io/elementCreated.js
 // @require     https://pixijs.download/release/pixi.js
@@ -260,6 +260,12 @@ function getVideoCanvas(videoElement){
       sprite.height=height;
       stage.addChild(sprite);
 
+      video.addEventListener("resize",()=>{
+        texture.destroy();
+        texture=PIXI.Texture.from(video);
+        sprite.texture=texture;
+        console.log(`${video.videoWidth}x${video.videoHeight}=>${width}x${height}`);
+      });
       let anime4k_deblur_dog         = new PIXI.Filter(null  , anime4k_deblur_dog_frag);
       let cartoon                    = new PIXI.Filter(vertex, cartoon_frag);
       let cas                        = new PIXI.Filter(vertex, cas_frag);
