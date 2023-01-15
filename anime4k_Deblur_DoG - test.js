@@ -3,12 +3,13 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://*/*.mp4
 // @grant       none
-// @version     1.5
+// @version     1.6
 // @author      -
 // @require     https://teddy92729.github.io/elementCreated.js
 // @require     https://pixijs.download/release/pixi.js
 // @description 2022/11/28 下午5:26:55
 // ==/UserScript==
+
 const anime4k_deblur_dog_frag=`
 precision highp float;
 varying vec2 vTextureCoord;
@@ -246,9 +247,11 @@ function getVideoCanvas(videoElement){
       else
         video.addEventListener("loadedmetadata",()=>{r1(video)});
     })).then((video)=>{
-
-      const width=2*video.videoWidth;
-      const height=2*video.videoHeight;
+      let scale=Math.sqrt((window.outerWidth*window.outerHeight)/(video.videoWidth*video.videoHeight));
+      scale=Math.min(scale,2);
+      let width=scale*video.videoWidth;
+      let height=scale*video.videoHeight;
+      console.log(`${video.videoWidth}x${video.videoHeight}=>${width}x${height}`);
 
       let renderer = new PIXI.Renderer({ width: width, height: height});
       let canvas= renderer.view;
@@ -266,6 +269,7 @@ function getVideoCanvas(videoElement){
         sprite.texture=texture;
         console.log(`${video.videoWidth}x${video.videoHeight}=>${width}x${height}`);
       });
+
       let anime4k_deblur_dog         = new PIXI.Filter(null  , anime4k_deblur_dog_frag);
       let cartoon                    = new PIXI.Filter(vertex, cartoon_frag);
       let cas                        = new PIXI.Filter(vertex, cas_frag);
