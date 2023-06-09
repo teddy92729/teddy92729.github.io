@@ -28,3 +28,25 @@ function splitUrl(url){
     }
   };
 }
+
+function injectCSS(css_string){
+  if(checkArgs(arguments,["string"])){
+    let css=document.createElement("style");
+    css.type="text/css";
+    css.innerText=css_string;
+    document.head.appendChild(css);
+    return true;
+  }
+  return false;
+}
+function checkArgs(args,types){
+  if(args.length<=types.length){
+    for(let i=0;i<args.length;++i){
+      if(types[i])
+        if(typeof args[i]!=types[i])
+          return false;
+    }
+    return true;
+  }
+  return false;
+}
