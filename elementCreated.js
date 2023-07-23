@@ -9,4 +9,4 @@ function elementCreated(selector){
     });
     observer.observe(document.body,{childList: true, subtree: true});
   });
-});
+}
