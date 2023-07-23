@@ -1,16 +1,12 @@
-function elementCreated(selector,setting){
-  setting={
-    node:document,
-    delay:200,
-    ...setting
-  }
-  return new Promise((r,rj)=>{
-    let id=setInterval(()=>{
-      let target=setting.node.querySelector(selector);
-      if(target){
-        clearInterval(id);
-        r(target);
+function elementCreated(selector){
+  return new Promise((r)=>{
+    const observer = new MutationObserver(()=>{
+      const target = document.querySelector(selector);
+      if (targetElement){
+        observer.disconnect();
+        r(targetElement);
       }
-    },setting.delay);
+    });
+    observer.observe(document.body,{childList: true, subtree: true});
   });
-}
+});
