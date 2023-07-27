@@ -315,8 +315,8 @@ function getVideoCanvas(videoElement){
       canvas.style.top="50%";
       canvas.style.left="50%";
       canvas.style.transform="translate(-50%, -50%)";
-      canvas.style.height="100%";
-      canvas.style.width="unset";
+      canvas.style.height="unset";
+      canvas.style.width="100%";
 
       video.addEventListener("play",update);
       update();
