@@ -242,10 +242,10 @@ function getVideoCanvas(videoElement){
   return new Promise(async(r0)=>{
     (new Promise(async (r1)=>{
       const video=(typeof videoElement === "string")?(await elementCreated(videoElement)):videoElement;
-      if(video.readyState===4)
+      if(video.readyState===4&&video.src)
         r1(video);
       else
-        video.addEventListener("loadedmetadata",()=>{r1(video)});
+        video.addEventListener("canplaythough",()=>{r1(video)});
     })).then((video)=>{
       let scale=Math.sqrt((window.outerWidth*window.outerHeight)/(video.videoWidth*video.videoHeight));
       scale=Math.min(scale,2);
