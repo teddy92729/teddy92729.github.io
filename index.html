@@ -30,6 +30,8 @@
                 // Avoid using this in new browsers, as it is going away.
                 localVideo.src = window.URL.createObjectURL(localStream);
             }
+            localVideo.play();
+            localVideo.muted=true;
         }
 
         navigator.mediaDevices
