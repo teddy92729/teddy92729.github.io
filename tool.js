@@ -32,3 +32,4 @@ function elementCreated(selector) {
         return pushStateFunc.apply(window.history, args);
     }
 })();
+console.log("tool.js loaded");
