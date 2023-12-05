@@ -28,6 +28,7 @@ function elementCreated(selector) {
     //override pushState
     const pushStateFunc = window.history.pushState;
     window.history.pushState = (...args) => {
+        console.info("pushState");
         document.dispatchEvent(pushStateEvent);
         return pushStateFunc.apply(window.history, args);
     }
