@@ -22,14 +22,14 @@ function elementCreated(selector) {
     });
 }
 
-//add pushState event to document
+//add pushState event to window
 (() => {
     const pushStateEvent = new CustomEvent("pushState");//pushState event
     //override pushState
     const pushStateFunc = window.history.pushState;
     window.history.pushState = (...args) => {
         console.info("pushState");
-        document.dispatchEvent(pushStateEvent);
+        window.dispatchEvent(pushStateEvent);
         return pushStateFunc.apply(window.history, args);
     }
 })();
