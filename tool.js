@@ -33,4 +33,17 @@ function elementCreated(selector) {
         return pushStateFunc.apply(window.history, args);
     }
 })();
+
+function addCss(cssString) {
+    let css = document.createElement("style");
+    css.innerText = cssString;
+    document.head.appendChild(css);
+    return css;
+}
+function addCssDisplayNone(...selector) {
+    return addCss(selector.map(s => `${s} {
+        display: none !important;
+    }`).join("\n"));
+}
+
 console.log("tool.js loaded");
