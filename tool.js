@@ -47,6 +47,7 @@ function addCssDisplayNone(...selector) {
 }
 function addCssDisplayNoneAlt(...selector) {
     return addCss(selector.map(s => `${s} {
+        display: block !important;
         visibility: hidden !important;
         width: 0px !important;
         height: 0px !important;
