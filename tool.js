@@ -45,5 +45,13 @@ function addCssDisplayNone(...selector) {
         display: none !important;
     }`).join("\n"));
 }
+function addCssDisplayNoneAlt(...selector) {
+    return addCss(selector.map(s => `${s} {
+        visibility: hidden !important;
+        width: 0px !important;
+        height: 0px !important;
+        overflow: hidden !important;
+    }`).join("\n"));
+}
 
 console.log("tool.js loaded");
