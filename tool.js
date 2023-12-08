@@ -1,21 +1,21 @@
-function after(ms) {
+let after = (ms) => {
     return new Promise((r) => {
         setTimeout(r, ms);
     });
 }
-function afterFrame() {
+let afterFrame = () => {
     return new Promise((r) => {
         requestAnimationFrame(r);
     });
 }
-function afterIdle() {
+let afterIdle = () => {
     return new Promise((r) => {
         requestIdleCallback(r);
     });
 }
 
 //wait for element to be created
-function elementCreated(selector, timeout = 10000) {
+let elementCreated = (selector, timeout = 10000) => {
     return new Promise((resolve, reject) => {
         let element = document.querySelector(selector);
         if (element) {
@@ -34,6 +34,14 @@ function elementCreated(selector, timeout = 10000) {
         after(timeout).then(() => observer.disconnect()).finally(() => reject());
     });
 }
+let waitVideoLoaded = (videoElement, timeout = 10000) => {
+    return new Promise((resolve, reject) => {
+        if (!(videoElement instanceof HTMLVideoElement)) return reject("invalid videoElement");
+        if (videoElement.readyState > 0) return resolve(videoElement);
+        videoElement.addEventListener("loadedmetadata", () => resolve(videoElement), { once: true });
+        after(timeout).then(reject);
+    });
+}
 
 //add pushState event to window
 (() => {
@@ -47,7 +55,7 @@ function elementCreated(selector, timeout = 10000) {
     }
 })();
 
-function addCss(cssString) {
+let addCss = (cssString) => {
     return new Promise((r) => {
         let css = document.createElement("style");
         css.innerText = cssString;
@@ -55,17 +63,17 @@ function addCss(cssString) {
         r(css);
     });
 }
-function addCssDisplayNone(...selector) {
+let addCssDisplayNone = (...selector) => {
     // return addCss(selector.map(s => `${s} {
     //     display: none !important;
     // }`).join("\n"));
     return addCss(`
-        ${selector.join(",")} {
+        ${selector.join(", ")} {
             display: none !important;
         }
     `);
 }
-function addCssDisplayNoneAlt(...selector) {
+let addCssDisplayNoneAlt = (...selector) => {
     // return addCss(selector.map(s => `${s} {
     //     display: block !important;
     //     visibility: hidden !important;
@@ -74,7 +82,7 @@ function addCssDisplayNoneAlt(...selector) {
     //     overflow: hidden !important;
     // }`).join("\n"));
     return addCss(`
-        ${selector.join(",")} {
+        ${selector.join(", ")} {
             display: block !important;
             visibility: hidden !important;
             width: 0px !important;
@@ -84,13 +92,6 @@ function addCssDisplayNoneAlt(...selector) {
     `);
 }
 
-function waitVideoLoaded(videoElement, timeout = 10000) {
-    return new Promise((resolve, reject) => {
-        if (!(videoElement instanceof HTMLVideoElement)) return reject("invalid videoElement");
-        if (videoElement.readyState > 0) return resolve(videoElement);
-        videoElement.addEventListener("loadedmetadata", () => resolve(videoElement), { once: true });
-        after(timeout).then(reject);
-    });
-}
+
 
 console.log("tool.js loaded");
