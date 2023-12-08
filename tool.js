@@ -13,8 +13,7 @@ let afterIdle = () => {
         requestIdleCallback(r);
     });
 }
-
-//wait for element to be created
+//--------------------
 let elementCreated = (selector, timeout = 10000) => {
     return new Promise((resolve, reject) => {
         let element = document.querySelector(selector);
@@ -30,7 +29,26 @@ let elementCreated = (selector, timeout = 10000) => {
             }
         });
         observer.observe(document.documentElement, { childList: true, subtree: true });
-        //reject if element is not created after 10 seconds
+        after(timeout).then(() => observer.disconnect()).finally(() => reject());
+    });
+}
+let elementRemoved = (element, timeout = 10000) => {
+    return new Promise((resolve, reject) => {
+        if (!element || !(element instanceof HTMLElement)) {
+            resolve();
+            return;
+        }
+        let observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.removedNodes.forEach((node) => {
+                    if (node === element) {
+                        observer.disconnect();
+                        resolve();
+                    }
+                });
+            });
+        });
+        observer.observe(element.parentNode, { childList: true });
         after(timeout).then(() => observer.disconnect()).finally(() => reject());
     });
 }
@@ -42,11 +60,9 @@ let waitVideoLoaded = (videoElement, timeout = 10000) => {
         after(timeout).then(reject);
     });
 }
-
-//add pushState event to window
+//--------------------
 (() => {
-    const pushStateEvent = new CustomEvent("pushState");//pushState event
-    //override pushState
+    const pushStateEvent = new Event("pushState");
     const pushStateFunc = window.history.pushState;
     window.history.pushState = (...args) => {
         console.info("pushState");
@@ -54,7 +70,7 @@ let waitVideoLoaded = (videoElement, timeout = 10000) => {
         return pushStateFunc.apply(window.history, args);
     }
 })();
-
+//--------------------
 let addCss = (cssString) => {
     return new Promise((r) => {
         let css = document.createElement("style");
@@ -64,9 +80,6 @@ let addCss = (cssString) => {
     });
 }
 let addCssDisplayNone = (...selector) => {
-    // return addCss(selector.map(s => `${s} {
-    //     display: none !important;
-    // }`).join("\n"));
     return addCss(`
         ${selector.join(", ")} {
             display: none !important;
@@ -74,13 +87,6 @@ let addCssDisplayNone = (...selector) => {
     `);
 }
 let addCssDisplayNoneAlt = (...selector) => {
-    // return addCss(selector.map(s => `${s} {
-    //     display: block !important;
-    //     visibility: hidden !important;
-    //     width: 0px !important;
-    //     height: 0px !important;
-    //     overflow: hidden !important;
-    // }`).join("\n"));
     return addCss(`
         ${selector.join(", ")} {
             display: block !important;
