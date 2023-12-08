@@ -41,18 +41,32 @@ function addCss(cssString) {
     return css;
 }
 function addCssDisplayNone(...selector) {
-    return addCss(selector.map(s => `${s} {
-        display: none !important;
-    }`).join("\n"));
+    // return addCss(selector.map(s => `${s} {
+    //     display: none !important;
+    // }`).join("\n"));
+    return addCss(`
+        ${selector.join(",")} {
+            display: none !important;
+        }
+    `);
 }
 function addCssDisplayNoneAlt(...selector) {
-    return addCss(selector.map(s => `${s} {
-        display: block !important;
-        visibility: hidden !important;
-        width: 0px !important;
-        height: 0px !important;
-        overflow: hidden !important;
-    }`).join("\n"));
+    // return addCss(selector.map(s => `${s} {
+    //     display: block !important;
+    //     visibility: hidden !important;
+    //     width: 0px !important;
+    //     height: 0px !important;
+    //     overflow: hidden !important;
+    // }`).join("\n"));
+    return addCss(`
+        ${selector.join(",")} {
+            display: block !important;
+            visibility: hidden !important;
+            width: 0px !important;
+            height: 0px !important;
+            overflow: hidden !important;
+        }
+    `);
 }
 
 console.log("tool.js loaded");
