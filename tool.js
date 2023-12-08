@@ -39,7 +39,7 @@ let elementRemoved = (element) => {
         }
         let observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                if (mutation.removedNodes?.contains(element))
+                if ([].slice.call(mutation.removedNodes).contains(element))
                     resolve();
             });
         });
