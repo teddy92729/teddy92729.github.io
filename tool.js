@@ -14,7 +14,7 @@ let afterIdle = () => {
     });
 }
 //--------------------
-let elementCreated = (selector, timeout = 10000) => {
+let elementCreated = (selector) => {
     return new Promise((resolve, reject) => {
         let element = document.querySelector(selector);
         if (element) {
@@ -29,10 +29,9 @@ let elementCreated = (selector, timeout = 10000) => {
             }
         });
         observer.observe(document.documentElement, { childList: true, subtree: true });
-        after(timeout).then(() => observer.disconnect()).finally(() => reject());
     });
 }
-let elementRemoved = (element, timeout = 10000) => {
+let elementRemoved = (element) => {
     return new Promise((resolve, reject) => {
         if (!element || !(element instanceof HTMLElement)) {
             resolve();
@@ -49,7 +48,6 @@ let elementRemoved = (element, timeout = 10000) => {
             });
         });
         observer.observe(element.parentNode, { childList: true });
-        after(timeout).then(() => observer.disconnect()).finally(() => reject());
     });
 }
 let waitVideoLoaded = (videoElement, timeout = 10000) => {
