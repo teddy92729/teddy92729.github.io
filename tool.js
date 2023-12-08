@@ -71,4 +71,10 @@ function addCssDisplayNoneAlt(...selector) {
     `);
 }
 
+function after(ms) {
+    return new Promise((r) => {
+        setTimeout(r, ms);
+    });
+}
+
 console.log("tool.js loaded");
