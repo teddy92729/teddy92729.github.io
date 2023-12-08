@@ -3,6 +3,16 @@ function after(ms) {
         setTimeout(r, ms);
     });
 }
+function afterFrame() {
+    return new Promise((r) => {
+        requestAnimationFrame(r);
+    });
+}
+function afterIdle() {
+    return new Promise((r) => {
+        requestIdleCallback(r);
+    });
+}
 
 //wait for element to be created
 function elementCreated(selector, timeout = 10000) {
