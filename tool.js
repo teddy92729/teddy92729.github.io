@@ -39,7 +39,7 @@ let elementRemoved = (element) => {
         }
         let observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                if ([].slice.call(mutation.removedNodes).contains(element))
+                if (Array.from(mutation.removedNodes).includes(element))
                     resolve();
             });
         });
@@ -91,7 +91,5 @@ let addCssDisplayNoneAlt = (...selector) => {
         }
     `);
 }
-
-
 
 console.log("tool.js loaded");
