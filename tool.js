@@ -39,12 +39,8 @@ let elementRemoved = (element) => {
         }
         let observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                mutation.removedNodes.forEach((node) => {
-                    if (node === element) {
-                        observer.disconnect();
-                        resolve();
-                    }
-                });
+                if (mutation.removedNodes.contains(element))
+                    resolve();
             });
         });
         observer.observe(element.parentNode, { childList: true });
