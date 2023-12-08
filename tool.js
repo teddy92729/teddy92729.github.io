@@ -1,5 +1,11 @@
+function after(ms) {
+    return new Promise((r) => {
+        setTimeout(r, ms);
+    });
+}
+
 //wait for element to be created
-function elementCreated(selector) {
+function elementCreated(selector, timeout = 10000) {
     return new Promise((resolve, reject) => {
         let element = document.querySelector(selector);
         if (element) {
@@ -15,10 +21,7 @@ function elementCreated(selector) {
         });
         observer.observe(document.documentElement, { childList: true, subtree: true });
         //reject if element is not created after 10 seconds
-        setTimeout(() => {
-            observer.disconnect();
-            reject();
-        }, 10000);
+        after(timeout).then(() => observer.disconnect()).finally(() => reject());
     });
 }
 
@@ -71,9 +74,12 @@ function addCssDisplayNoneAlt(...selector) {
     `);
 }
 
-function after(ms) {
-    return new Promise((r) => {
-        setTimeout(r, ms);
+function waitVideoLoaded(videoElement, timeout = 10000) {
+    return new Promise((resolve, reject) => {
+        if (!(videoElement instanceof HTMLVideoElement)) return reject("invalid videoElement");
+        if (videoElement.readyState > 0) return resolve(videoElement);
+        videoElement.addEventListener("loadedmetadata", () => resolve(videoElement), { once: true });
+        after(timeout).then(reject);
     });
 }
 
