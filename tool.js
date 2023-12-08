@@ -35,10 +35,12 @@ function elementCreated(selector) {
 })();
 
 function addCss(cssString) {
-    let css = document.createElement("style");
-    css.innerText = cssString;
-    document.head.appendChild(css);
-    return css;
+    return new Promise((r) => {
+        let css = document.createElement("style");
+        css.innerText = cssString;
+        document.head.appendChild(css);
+        r(css);
+    });
 }
 function addCssDisplayNone(...selector) {
     // return addCss(selector.map(s => `${s} {
