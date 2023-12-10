@@ -1,16 +1,16 @@
-let after = (ms) => {
+let after = (ms, ...args) => {
     return new Promise((r) => {
-        setTimeout(r, ms);
+        setTimeout(() => r(...args), ms);
     });
 }
-let afterFrame = () => {
+let afterFrame = (...args) => {
     return new Promise((r) => {
-        requestAnimationFrame(r);
+        requestAnimationFrame(() => r(...args));
     });
 }
-let afterIdle = () => {
+let afterIdle = (...args) => {
     return new Promise((r) => {
-        requestIdleCallback(r);
+        requestIdleCallback(() => r(...args));
     });
 }
 //--------------------
