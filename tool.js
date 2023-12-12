@@ -94,5 +94,15 @@ let addCssDisplayNoneAlt = (...selector) => {
         }
     `);
 }
-
+//--------------------
+let fetchDocument = (() => {
+    let domParser = new DOMParser();
+    return (...args) =>
+        fetch(...args).then((res) => {
+            return res.text();
+        }).then((html) => {
+            return domParser.parseFromString(html, "text/html");
+        });
+})();
 console.log("tool.js loaded");
+
