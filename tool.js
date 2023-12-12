@@ -99,10 +99,10 @@ let fetchDocument = (() => {
     let domParser = new DOMParser();
     return (...args) =>
         fetch(...args).then((res) => {
+            if (!res.ok) throw new Error(`fetch error: ${res.status} ${res.statusText}`);
             return res.text();
         }).then((html) => {
             return domParser.parseFromString(html, "text/html");
         });
 })();
 console.log("tool.js loaded");
-
