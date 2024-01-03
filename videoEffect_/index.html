@@ -10,13 +10,11 @@
 </body>
 <script>
     class VideoEffect {
-        static init() {
-            VideoEffect.canvas = document.createElement("canvas");
-            VideoEffect.webgl = VideoEffect.canvas.getContext("webgl2");
-        }
-        constructor(srcVideoElement, destVideoElement, videoEditer) {
+        constructor(srcVideoElement, destVideoElement) {
             if (!(srcVideoElement instanceof HTMLVideoElement)) throw new Error("invalid srcVideoElement");
             if (!(destVideoElement instanceof HTMLVideoElement)) throw new Error("invalid destVideoElement");
+
+            this.__videoFrameHandlerList = [];
 
             srcVideoElement.addEventListener("play", () => {
                 const videoStream = srcVideoElement.captureStream();
@@ -25,12 +23,11 @@
                 const trackGenerator = new MediaStreamTrackGenerator({ kind: "video" });
                 const transformer = new TransformStream({
                     async transform(videoFrame, controller) {
-                        let _videoFrame = videoEditer?.(videoFrame);
-                        if (_videoFrame instanceof VideoFrame)
-                            controller.enqueue(_videoFrame);
-                        else
-                            controller.enqueue(videoFrame);
-                    },
+                        let _videoFrame = this.__videoFrameHandlerList.reduce((frame, handler) => {
+                            return handler(frame);
+                        }, videoFrame);
+                        controller.enqueue(_videoFrame);
+                    }
                 });
                 trackProcessor.readable
                     .pipeThrough(transformer)
@@ -46,13 +43,20 @@
                     });
                 });
             });
+
+            this.canvas = document.createElement("canvas");
+            this.context = this.canvas.getContext("2d");
         }
+
+        addVideoFrameHandler(handler) {
+            if (typeof handler !== "function") throw new Error("invalid handler");
+            this.__videoFrameHandlerList.push(handler);
+        }
+
     };
     let v1 = document.getElementById("v1");
     let v2 = document.getElementById("v2");
-    let pipe = new VideoEffect(v1, v2, (frame) => {
-        return frame;
-    });
+    let pipe = new VideoEffect(v1, v2);
 </script>
 
 </html>
