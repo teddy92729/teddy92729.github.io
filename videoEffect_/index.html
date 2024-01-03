@@ -13,7 +13,7 @@
         constructor(srcVideoElement, videoEditer, destVideoElement) {
             if (!(srcVideoElement instanceof HTMLVideoElement)) throw new Error("invalid srcVideoElement");
             if (!(destVideoElement instanceof HTMLVideoElement)) throw new Error("invalid destVideoElement");
-            if (!(transformer instanceof TransformStream)) throw new Error("invalid transformer");
+            if (!(videoEditer instanceof TransformStream)) throw new Error("invalid transformer");
 
             srcVideoElement.addEventListener("play", () => {
                 const videoStream = srcVideoElement.captureStream();
