@@ -10,7 +10,7 @@
 </body>
 <script>
     class VideoEffect_TransformStream {
-        constructor(srcVideoElement, transformer, destVideoElement) {
+        constructor(srcVideoElement, videoEditer, destVideoElement) {
             if (!(srcVideoElement instanceof HTMLVideoElement)) throw new Error("invalid srcVideoElement");
             if (!(destVideoElement instanceof HTMLVideoElement)) throw new Error("invalid destVideoElement");
             if (!(transformer instanceof TransformStream)) throw new Error("invalid transformer");
@@ -20,6 +20,13 @@
                 const videoTrack = videoStream.getVideoTracks()[0];
                 const trackProcessor = new MediaStreamTrackProcessor({ track: videoTrack });
                 const trackGenerator = new MediaStreamTrackGenerator({ kind: "video" });
+                const transformer = new TransformStream({
+                    async transform(videoFrame, controller) {
+                        videoEditer?.(videoFrame);
+                        // videoFrame.close();
+                        controller.enqueue(videoFrame);
+                    },
+                });
 
                 destVideoElement.srcObject = new MediaStream([trackGenerator]);
                 destVideoElement.play();
@@ -31,13 +38,7 @@
     };
     let v1 = document.getElementById("v1");
     let v2 = document.getElementById("v2");
-    const transformer = new TransformStream({
-        async transform(videoFrame, controller) {
-            // videoFrame.close();
-            controller.enqueue(videoFrame);
-        },
-    })
-    let pipe = new VideoEffect_TransformStream(v1, transformer, v2);
+    let pipe = new VideoEffect_TransformStream(v1, () => { }, v2);
 </script>
 
 </html>
