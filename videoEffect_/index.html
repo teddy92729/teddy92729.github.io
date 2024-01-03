@@ -9,7 +9,11 @@
     <video id="v2"></video>
 </body>
 <script>
-    class VideoEffect_TransformStream {
+    class VideoEffect {
+        static init() {
+            VideoEffect.canvas = document.createElement("canvas");
+            VideoEffect.webgl = VideoEffect.canvas.getContext("webgl2");
+        }
         constructor(srcVideoElement, destVideoElement, videoEditer) {
             if (!(srcVideoElement instanceof HTMLVideoElement)) throw new Error("invalid srcVideoElement");
             if (!(destVideoElement instanceof HTMLVideoElement)) throw new Error("invalid destVideoElement");
@@ -21,9 +25,11 @@
                 const trackGenerator = new MediaStreamTrackGenerator({ kind: "video" });
                 const transformer = new TransformStream({
                     async transform(videoFrame, controller) {
-                        videoEditer?.(videoFrame);
-                        // setTimeout(() => videoFrame.close(), 1000);
-                        controller.enqueue(videoFrame);
+                        let _videoFrame = videoEditer?.(videoFrame);
+                        if (_videoFrame instanceof VideoFrame)
+                            controller.enqueue(_videoFrame);
+                        else
+                            controller.enqueue(videoFrame);
                     },
                 });
                 trackProcessor.readable
@@ -38,17 +44,14 @@
                     destVideoElement.addEventListener("play", () => {
                         srcVideoElement.play();
                     });
-                    destVideoElement.addEventListener("seeked", () => {
-                        srcVideoElement.currentTime = destVideoElement.currentTime;
-                    });
                 });
-            })
+            });
         }
     };
     let v1 = document.getElementById("v1");
     let v2 = document.getElementById("v2");
-    let pipe = new VideoEffect_TransformStream(v1, v2, (frame) => {
-
+    let pipe = new VideoEffect(v1, v2, (frame) => {
+        return frame;
     });
 </script>
 
