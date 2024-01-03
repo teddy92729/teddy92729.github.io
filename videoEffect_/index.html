@@ -22,7 +22,6 @@
 
                 const trackProcessor = new MediaStreamTrackProcessor({ track: videoTrack });
 
-
                 trackProcessor.readable
                     .pipeThrough(transformer)
                     .pipeTo(trackGenerator.writable);
@@ -31,12 +30,12 @@
     };
     let v1 = document.getElementById("v1");
     let v2 = document.getElementById("v2");
-    let transformer = new TransformStream({
-        transform: (chunk, controller) => {
-            console.log(chunk);
-            controller.enqueue(chunk);
-        }
-    });
+    const transformer = new TransformStream({
+        async transform(videoFrame, controller) {
+            videoFrame.close();
+            controller.enqueue(videoFrame);
+        },
+    })
     let pipe = new VideoEffect_TransformStream(v1, transformer, v2);
 </script>
 
