@@ -26,12 +26,22 @@
                         controller.enqueue(videoFrame);
                     },
                 });
-
-                destVideoElement.srcObject = new MediaStream([trackGenerator]);
-                destVideoElement.play();
                 trackProcessor.readable
                     .pipeThrough(transformer)
                     .pipeTo(trackGenerator.writable);
+
+                destVideoElement.srcObject = new MediaStream([trackGenerator]);
+                destVideoElement.play().then(() => {
+                    destVideoElement.addEventListener("pause", () => {
+                        srcVideoElement.pause();
+                    });
+                    destVideoElement.addEventListener("play", () => {
+                        srcVideoElement.play();
+                    });
+                    destVideoElement.addEventListener("seeked", () => {
+                        srcVideoElement.currentTime = destVideoElement.currentTime;
+                    });
+                });
             })
         }
     };
