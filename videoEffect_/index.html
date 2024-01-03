@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+</head>
+
+<body>
+    <video src="./miku.webm" id="v1"></video>
+    <video id="v2"></video>
+</body>
+<script>
+    class VideoEffect_TransformStream {
+        constructor(srcVideoElement, transformer, destVideoElement) {
+            if (!(srcVideoElement instanceof HTMLVideoElement)) throw new Error("invalid srcVideoElement");
+            if (!(destVideoElement instanceof HTMLVideoElement)) throw new Error("invalid destVideoElement");
+            if (!(transformer instanceof TransformStream)) throw new Error("invalid transformer");
+            const trackGenerator = new MediaStreamTrackGenerator({ kind: "video" });
+            destVideoElement.srcObject = new MediaStream([trackGenerator]);
+            srcVideoElement.addEventListener("play", () => {
+                const videoStream = srcVideoElement.captureStream();
+                const videoTrack = videoStream.getVideoTracks()[0];
+
+                const trackProcessor = new MediaStreamTrackProcessor({ track: videoTrack });
+
+
+                trackProcessor.readable
+                    .pipeThrough(transformer)
+                    .pipeTo(trackGenerator.writable);
+            })
+        }
+    };
+    let v1 = document.getElementById("v1");
+    let v2 = document.getElementById("v2");
+    let transformer = new TransformStream({
+        transform: (chunk, controller) => {
+            console.log(chunk);
+            controller.enqueue(chunk);
+        }
+    });
+    let pipe = new VideoEffect_TransformStream(v1, transformer, v2);
+</script>
+
+</html>
