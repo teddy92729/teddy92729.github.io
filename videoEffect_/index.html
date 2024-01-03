@@ -22,7 +22,7 @@
                 const transformer = new TransformStream({
                     async transform(videoFrame, controller) {
                         videoEditer?.(videoFrame);
-                        setTimeout(() => videoFrame.close(), 1000);
+                        // setTimeout(() => videoFrame.close(), 1000);
                         controller.enqueue(videoFrame);
                     },
                 });
