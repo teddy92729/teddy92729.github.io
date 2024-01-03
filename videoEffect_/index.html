@@ -14,14 +14,14 @@
             if (!(srcVideoElement instanceof HTMLVideoElement)) throw new Error("invalid srcVideoElement");
             if (!(destVideoElement instanceof HTMLVideoElement)) throw new Error("invalid destVideoElement");
             if (!(transformer instanceof TransformStream)) throw new Error("invalid transformer");
-            const trackGenerator = new MediaStreamTrackGenerator({ kind: "video" });
-            destVideoElement.srcObject = new MediaStream([trackGenerator]);
+
             srcVideoElement.addEventListener("play", () => {
                 const videoStream = srcVideoElement.captureStream();
                 const videoTrack = videoStream.getVideoTracks()[0];
-
                 const trackProcessor = new MediaStreamTrackProcessor({ track: videoTrack });
+                const trackGenerator = new MediaStreamTrackGenerator({ kind: "video" });
 
+                destVideoElement.srcObject = new MediaStream([trackGenerator]);
                 trackProcessor.readable
                     .pipeThrough(transformer)
                     .pipeTo(trackGenerator.writable);
@@ -32,7 +32,7 @@
     let v2 = document.getElementById("v2");
     const transformer = new TransformStream({
         async transform(videoFrame, controller) {
-            videoFrame.close();
+            // videoFrame.close();
             controller.enqueue(videoFrame);
         },
     })
