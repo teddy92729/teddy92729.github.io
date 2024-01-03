@@ -10,7 +10,7 @@
 </body>
 <script>
     class VideoEffect_TransformStream {
-        constructor(srcVideoElement, videoEditer, destVideoElement) {
+        constructor(srcVideoElement, destVideoElement, videoEditer) {
             if (!(srcVideoElement instanceof HTMLVideoElement)) throw new Error("invalid srcVideoElement");
             if (!(destVideoElement instanceof HTMLVideoElement)) throw new Error("invalid destVideoElement");
 
@@ -37,7 +37,9 @@
     };
     let v1 = document.getElementById("v1");
     let v2 = document.getElementById("v2");
-    let pipe = new VideoEffect_TransformStream(v1, () => { }, v2);
+    let pipe = new VideoEffect_TransformStream(v1, v2, (frame) => {
+        frame.close();
+    });
 </script>
 
 </html>
