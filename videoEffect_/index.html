@@ -22,6 +22,7 @@
                 const trackGenerator = new MediaStreamTrackGenerator({ kind: "video" });
 
                 destVideoElement.srcObject = new MediaStream([trackGenerator]);
+                destVideoElement.play();
                 trackProcessor.readable
                     .pipeThrough(transformer)
                     .pipeTo(trackGenerator.writable);
